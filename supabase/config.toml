@@ -1,0 +1,5 @@
+
+project_id = "xwloprhomuuvvclaekhd"
+
+[functions.osint-query]
+verify_jwt = false
