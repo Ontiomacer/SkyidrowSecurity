@@ -226,7 +226,7 @@ const ThreatMap: React.FC<ThreatMapProps> = ({
       }
 
       // Use local proxy for geolocation to avoid CORS issues
-      const response = await fetch(`https://skyidrowsecurity.onrender.com/api/ipgeo/${ip}`);
+      const response = await fetch(`/api/ipgeo/${ip}`);
       const data = await response.json();
 
       if (data.success) {
@@ -379,7 +379,7 @@ const ThreatMap: React.FC<ThreatMapProps> = ({
     setTracerouteError(null);
     try {
       console.log(`[Traceroute] Starting traceroute to ${ipAddress}`);
-      const response = await fetch(`https://skyidrowsecurity.onrender.com/api/traceroute/${ipAddress}?t=${Date.now()}`);
+      const response = await fetch(`/api/traceroute/${ipAddress}?t=${Date.now()}`);
       
       console.log(`[Traceroute] Response status: ${response.status}`);
       
@@ -454,7 +454,7 @@ const ThreatMap: React.FC<ThreatMapProps> = ({
         const ip = ipMatch[1];
         try {
           // Use same base URL as addIpMarker for consistency
-          const geoRes = await fetch(`https://skyidrowsecurity.onrender.com/api/ipgeo/${ip}`);
+          const geoRes = await fetch(`/api/ipgeo/${ip}`);
           const geoData = await geoRes.json();
           if (geoData.success && geoData.latitude && geoData.longitude) {
             latlngs.push([geoData.latitude, geoData.longitude]);

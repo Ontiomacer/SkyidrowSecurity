@@ -80,7 +80,7 @@ const ThreatMapDashboard: React.FC = () => {
     try {
       console.log(`Fetching geolocation for IP: ${ipInput}`);
       
-      const response = await fetch(`https://skyidrowsecurity.onrender.com/api/ipgeo/${ipInput.trim()}`, {
+      const response = await fetch(`/api/ipgeo/${ipInput.trim()}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',

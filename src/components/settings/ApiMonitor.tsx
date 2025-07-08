@@ -23,7 +23,7 @@ export const ApiMonitor: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('https://skyidrowsecurity.onrender.com/api/monitor');
+      const res = await fetch('/api/monitor');
       if (!res.ok) throw new Error('Failed to fetch API status');
       const data = await res.json();
       setStatuses(data.statuses);
