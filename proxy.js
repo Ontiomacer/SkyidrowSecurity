@@ -21,7 +21,7 @@ const apiKeys = new Map();
 
 // Enable CORS for all routes
 app.use(cors({
-  origin: ['http://localhost:8080', 'http://localhost:5001'],
+  origin: ['http://localhost:8080', 'https://skyidrowsecurity.onrender.com'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
     'Content-Type', 

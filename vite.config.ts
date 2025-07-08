@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => ({
     proxy: {
       // Proxy API requests to Express backend
       "/api": {
-        target: "http://localhost:5001",
+        target: "https://skyidrowsecurity.onrender.com",
         changeOrigin: true,
         secure: false,
         // Add WebSocket support for future real-time features

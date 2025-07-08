@@ -64,9 +64,9 @@ export const ApiKeyManager: React.FC = () => {
 
   const fetchApiKeys = async () => {
     try {
-      console.log('Fetching API keys from:', 'http://localhost:5001/api/keys');
+      console.log('Fetching API keys from:', 'https://skyidrowsecurity.onrender.com/api/keys');
       
-      const response = await fetch('http://localhost:5001/api/keys', {
+      const response = await fetch('https://skyidrowsecurity.onrender.com/api/keys', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -130,7 +130,7 @@ export const ApiKeyManager: React.FC = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5001/api/keys', {
+      const response = await fetch('https://skyidrowsecurity.onrender.com/api/keys', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -166,7 +166,7 @@ export const ApiKeyManager: React.FC = () => {
     if (!window.confirm('Are you sure you want to delete this API key?')) return;
 
     try {
-      const response = await fetch(`http://localhost:5001/api/keys/${id}`, {
+      const response = await fetch(`https://skyidrowsecurity.onrender.com/api/keys/${id}`, {
         method: 'DELETE',
       });
 
