@@ -9,7 +9,7 @@ import {
   AnalysisStats
 } from '../../../types/virusTotalTypes';
 
-const BASE_URL = 'https://www.virustotal.com/api/v3';
+const BASE_URL = '/api/virustotal';
 
 export async function checkIP(ip: string): Promise<ProviderResponse> {
   try {
