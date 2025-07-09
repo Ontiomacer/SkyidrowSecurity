@@ -1,3 +1,39 @@
+// --- VirusTotal Proxy Endpoint ---
+app.get('/api/virustotal/domains/:domain', async (req, res) => {
+  const { domain } = req.params;
+  const apiKey = process.env.VIRUSTOTAL_API_KEY || process.env.VIRUS_TOTAL_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: 'VirusTotal API key not configured on server.' });
+  }
+  try {
+    const url = `https://www.virustotal.com/api/v3/domains/${domain}`;
+    const vtRes = await fetch(url, {
+      headers: { 'x-apikey': apiKey }
+    });
+    const data = await vtRes.json();
+    res.status(vtRes.status).json(data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch from VirusTotal', details: err.message });
+  }
+});
+
+// --- Domain Resolution Proxy Endpoint ---
+app.get('/api/resolve-domain', async (req, res) => {
+  const { domain } = req.query;
+  if (!domain) {
+    return res.status(400).json({ error: 'Missing domain parameter' });
+  }
+  try {
+    // Example: Use DNS-over-HTTPS (Cloudflare)
+    const dnsRes = await fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=A`, {
+      headers: { 'accept': 'application/dns-json' }
+    });
+    const data = await dnsRes.json();
+    res.status(dnsRes.status).json(data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to resolve domain', details: err.message });
+  }
+});
 
 import express from 'express';
 import fetch from 'node-fetch';
