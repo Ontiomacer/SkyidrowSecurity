@@ -1,4 +1,3 @@
-
 # Skyidrow Security Intelligence Platform
 
 ## Overview
@@ -65,6 +64,40 @@ npm run build
 # Serve the production build (e.g., with serve, nginx, or your cloud provider)
 ```
 See the deployment section in the documentation for domain, SSL, and cloud setup tips.
+
+---
+
+## 🏁 Quick Start Instructions
+
+1. **Clone the Repository**
+   ```sh
+   git clone https://github.com/Ontiomacer/SkyidrowSecurity.git
+   cd SkyidrowSecurity
+   ```
+2. **Install Dependencies**
+   ```sh
+   npm install
+   # or
+   bun install
+   ```
+3. **Configure API Keys**
+   - Copy `src/config/apiKeys.ts.example` to `src/config/apiKeys.ts` if needed.
+   - Add your API keys in `src/config/apiKeys.ts` or set them as environment variables.
+4. **Install Required Tools**
+   - Install [nmap](https://nmap.org/download.html) and ensure it’s in your system PATH.
+   - (Optional) Install `urlbuster` for URL brute-force features.
+5. **Start the Backend Proxy**
+   ```sh
+   node proxy.js
+   # or
+   npm run start:proxy
+   ```
+6. **Start the Frontend**
+   ```sh
+   npm run dev
+   ```
+7. **Open the App**
+   - Visit [http://localhost:8080](http://localhost:8080) in your browser.
 
 ---
 
