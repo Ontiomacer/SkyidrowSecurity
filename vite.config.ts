@@ -9,14 +9,12 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     proxy: {
-      // Proxy API requests to Express backend
+      // Proxy API requests to Express backend (localhost for dev)
       "/api": {
-        target: "https://skyidrowsecurity.onrender.com",
+        target: "http://localhost:5001",
         changeOrigin: true,
         secure: false,
-        // Add WebSocket support for future real-time features
         ws: true,
-        // Add logging for proxy requests (for easier debugging)
         configure: (proxy, options) => {
           proxy.on('proxyReq', (proxyReq, req) => {
             // eslint-disable-next-line no-console
@@ -25,11 +23,8 @@ export default defineConfig(({ mode }) => ({
         },
       },
     },
-    // Enable SPA fallback for client-side routing
     historyApiFallback: true,
-    // Open browser automatically on dev start
     open: true,
-    // Allow CORS for local development
     cors: true,
   },
   plugins: [
