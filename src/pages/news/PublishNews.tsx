@@ -1,16 +1,26 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+
 const PublishNews: React.FC = () => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [category, setCategory] = useState('');
   const [content, setContent] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [articles, setArticles] = useState<Array<{title: string; author: string; category: string; content: string; date: string}>>([]);
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const newArticle = {
+      title,
+      author,
+      category,
+      content,
+      date: new Date().toLocaleString()
+    };
+    setArticles([newArticle, ...articles]);
     setSubmitted(true);
     setTimeout(() => setSubmitted(false), 2000);
     setTitle('');
@@ -73,6 +83,22 @@ const PublishNews: React.FC = () => {
           </button>
           {submitted && <div className="text-green-600 font-semibold">News published successfully!</div>}
         </form>
+
+        {/* Published News Articles */}
+        {articles.length > 0 && (
+          <section className="max-w-2xl mx-auto mt-10">
+            <h2 className="text-2xl font-bold mb-4 text-blue-900">Published News</h2>
+            <div className="space-y-6">
+              {articles.map((article, idx) => (
+                <div key={idx} className="bg-white border border-blue-200 rounded-lg shadow p-4">
+                  <h3 className="text-xl font-bold text-blue-800 mb-1">{article.title}</h3>
+                  <div className="text-xs text-gray-500 mb-2">By {article.author} | {article.category} | {article.date}</div>
+                  <p className="text-gray-800 whitespace-pre-line">{article.content}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );
