@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { GuardianNewsArticle } from '@/services/GuardianNewsService';
 import { slugify } from './utils';
+import { useNewsAggregator } from '@/hooks/useNewsAggregator';
 
 // Unified news type
 interface UnifiedNews {
@@ -29,84 +30,31 @@ const NewsArticlePage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Try to get article from location state (if navigated from modal)
-  const stateArticle = location.state?.article as UnifiedNews | undefined;
+  // Try to get article from location state first
+  const stateArticle = location.state?.article;
+  const { news: allNews } = useNewsAggregator({});
 
-  // Fallback: search all sources by id
-  const allCyber: UnifiedNews[] = (cybernewsArticles as { id: string; title: string; summary: string; url: string; date: string; image: string; source: string; }[]).map(a => ({
-    id: a.id || slugify(a.title),
-    title: a.title,
-    author: a.source || 'CyberNews',
-    date: a.date || '',
-    category: 'Cyber Security',
-    link: a.url,
-    image: a.image,
-    summary: a.summary,
-    content: a.summary,
-    isLive: false,
-  }));
-
-  // If NEWS_CARDS is not imported, copy the static cards here (moved inside useMemo)
-
-  // Try to find the article by id
-  const article: UnifiedNews | undefined = useMemo(() => {
-    const allStatic = [
-      {
-        id: slugify('Stealthy WordPress Malware Delivers Windows Trojan via PHP Backdoor'),
-        title: 'Stealthy WordPress Malware Delivers Windows Trojan via PHP Backdoor',
-        author: 'Tushar Subhra Dutta',
-        date: 'July 1, 2025',
-        category: 'Cyber Security',
-        link: '#',
-        image: 'https://www.bleepstatic.com/content/hl-images/2023/11/20/wordpress-malware.jpg',
-        summary: 'A sophisticated multi-stage malware campaign has been discovered targeting WordPress websites, employing an intricate infection chain that delivers Windows trojans to unsuspecting visitors.',
-        content: `Security researchers have uncovered a new malware campaign targeting WordPress sites. The attackers use a PHP backdoor to inject malicious code, which redirects visitors to sites hosting Windows trojans. The infection chain is multi-stage, making detection difficult. Site owners are urged to update plugins and monitor for suspicious activity.`
-      },
-      {
-        id: slugify('MongoDB Server Pre-Authentication Vulnerability Let Attackers Trigger DoS'),
-        title: 'MongoDB Server Pre-Authentication Vulnerability Let Attackers Trigger DoS',
-        author: 'Kaaviya',
-        date: 'June 27, 2025',
-        category: 'Cyber Security',
-        link: '#',
-        image: 'https://www.mongodb.com/assets/images/global/leaf.png',
-        summary: 'A critical pre-auth vulnerability in MongoDB Server could allow remote attackers to trigger denial-of-service conditions, impacting cloud and on-prem deployments.',
-        content: `A newly disclosed vulnerability in MongoDB Server allows unauthenticated attackers to send specially crafted requests, causing the server to crash. MongoDB has released patches and urges all users to update immediately. The flaw is tracked as CVE-2025-12345.`
-      },
-      {
-        id: slugify('2,000+ Devices Hacked Using Weaponized Social Security Statement'),
-        title: '2,000+ Devices Hacked Using Weaponized Social Security Statement',
-        author: 'Tushar Subhra Dutta',
-        date: 'June 24, 2025',
-        category: 'Cyber Security News',
-        link: '#',
-        image: 'https://www.securityweek.com/wp-content/uploads/2023/10/social-security-hack.jpg',
-        summary: 'Threat actors have exploited fake Social Security statement emails to deliver info-stealer malware, compromising over 2,000 devices in a new phishing campaign.',
-        content: `Researchers have observed a surge in phishing emails mimicking official Social Security statements. The emails contain malicious attachments that, when opened, install info-stealer malware. Over 2,000 devices have been compromised, with stolen credentials being sold on dark web forums.`
-      }
-    ];
+  // If no state article, try to find it in all news
+  const article = useMemo(() => {
     if (stateArticle) return stateArticle;
     if (!id) return undefined;
-    // Try cybernews
-    const foundCyber = allCyber.find(a => a.id === id);
-    if (foundCyber) return foundCyber;
-    // Try static
-    const foundStatic = allStatic.find(a => a.id === id);
-    if (foundStatic) return foundStatic;
-    // Try static by slugified title
-    const foundStaticBySlug = allStatic.find(a => slugify(a.title) === id);
-    if (foundStaticBySlug) return foundStaticBySlug;
-    // Try cyber by slugified title
-    const foundCyberBySlug = allCyber.find(a => slugify(a.title) === id);
-    if (foundCyberBySlug) return foundCyberBySlug;
-    return undefined;
-  }, [id, stateArticle, allCyber]);
+    // Look for article in all news sources
+    return allNews.find(a => a.id === id || slugify(a.title) === id);
+  }, [id, stateArticle, allNews]);
 
   if (!article) {
     return (
       <div className="min-h-screen bg-gray-950 flex flex-col">
         <Header />
-        <div className="flex-1 flex items-center justify-center text-blue-200 text-xl">Article not found.</div>
+        <div className="flex-1 flex flex-col items-center justify-center text-blue-200">
+          <div className="text-2xl font-bold mb-4">Article not found</div>
+          <button
+            className="px-6 py-2 rounded-lg bg-blue-700 text-white font-semibold shadow hover:bg-blue-600 transition"
+            onClick={() => navigate('/news')}
+          >
+            ← Back to News
+          </button>
+        </div>
       </div>
     );
   }
@@ -120,26 +68,66 @@ const NewsArticlePage: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 30 }}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-2xl bg-gray-900/90 rounded-2xl shadow-2xl border-2 border-blue-700/60 p-8 flex flex-col gap-4"
+          className="w-full max-w-4xl bg-gray-900/90 rounded-2xl shadow-2xl border-2 border-blue-700/60 p-8 flex flex-col gap-4"
         >
           <button
             className="mb-4 text-blue-400 hover:underline text-sm self-start"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/news')}
           >
             ← Back to News
           </button>
           <h1 className="text-3xl font-extrabold text-blue-200 mb-2 break-words">{article.title}</h1>
-          <div className="flex items-center gap-2 text-blue-400 text-xs mb-4 flex-wrap">
-            <span className="font-semibold">{article.author}</span>
-            <span>-</span>
-            <span>{article.date}</span>
+          <div className="flex items-center gap-3 text-blue-400 text-sm flex-wrap mb-4">
+            {article.author && (
+              <>
+                <span className="font-semibold">{article.author}</span>
+                <span>•</span>
+              </>
+            )}
+            <span>{new Date(article.date).toLocaleDateString()}</span>
+            {article.category && (
+              <>
+                <span>•</span>
+                <span>{article.category}</span>
+              </>
+            )}
+            {article.severity && (
+              <span className={`ml-2 px-2 py-1 rounded text-xs font-bold shadow ${
+                article.severity === 'Critical' ? 'bg-red-700 text-white' : 
+                article.severity === 'High' ? 'bg-orange-600 text-white' : 
+                article.severity === 'Moderate' ? 'bg-yellow-600 text-white' : 
+                'bg-blue-700 text-white'
+              }`}>{article.severity}</span>
+            )}
           </div>
           {article.image && (
-            <img src={article.image} alt={article.title} className="w-full h-56 object-cover rounded mb-4 bg-gray-800" />
+            <img src={article.image} alt={article.title} className="w-full h-64 object-cover rounded-xl mb-4 bg-gray-800" />
           )}
-          <p className="text-blue-100 mb-4 whitespace-pre-line break-words">{article.content || article.summary}</p>
+          <div className="prose prose-lg dark:prose-invert max-w-none text-blue-100 text-xl leading-relaxed whitespace-pre-line">
+            {article.content || article.summary}
+          </div>
+          {(article.cves?.length > 0 || article.iocs?.length > 0) && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {article.cves?.map(cve => (
+                <span key={cve} className="bg-red-900/80 text-red-200 px-2 py-0.5 rounded text-xs font-mono">{cve}</span>
+              ))}
+              {article.iocs?.map(ioc => (
+                <span key={ioc} className="bg-blue-900/80 text-blue-200 px-2 py-0.5 rounded text-xs font-mono">{ioc}</span>
+              ))}
+            </div>
+          )}
           {article.link && article.link !== '#' && (
-            <a href={article.link} target="_blank" rel="noopener noreferrer" className="block text-blue-400 underline mb-4">Read original source</a>
+            <a 
+              href={article.link} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="mt-4 inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              <span className="underline">Read original source</span>
+              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
           )}
         </motion.div>
       </main>

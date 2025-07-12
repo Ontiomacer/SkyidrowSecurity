@@ -186,14 +186,25 @@ const ThreatMap: React.FC<ThreatMapProps> = ({
 
   // Add a marker for an IP address
   const addIpMarker = useCallback(async (ip: string) => {
+
     // Basic IP validation
     const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
     const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
-    
     if (!ipv4Regex.test(ip) && !ipv6Regex.test(ip)) {
       toast({
         title: 'Invalid IP Address',
         description: 'Please enter a valid IPv4 or IPv6 address',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    // Ensure map is initialized before proceeding
+    if (!window.L || !map.current) {
+      setIsLoading(false);
+      toast({
+        title: 'Map is not initialized',
+        description: 'Please wait for the map to load before adding markers.',
         variant: 'destructive'
       });
       return;
@@ -211,11 +222,6 @@ const ThreatMap: React.FC<ThreatMapProps> = ({
     }
 
     setIsLoading(true);
-    
-    if (!window.L || !map.current) {
-      setIsLoading(false);
-      return;
-    }
 
     try {
       // Remove any existing marker for this IP before adding a new one
@@ -255,14 +261,19 @@ const ThreatMap: React.FC<ThreatMapProps> = ({
         if (!latLng) throw new Error('No valid coordinates for this IP');
 
         // Create a marker with pulsing effect
-        const marker = window.L.marker(
-          latLng,
-          {
-            icon: createPulsingIcon(),
-            title: `IP: ${ip}`,
-            riseOnHover: true
-          }
-        ).addTo(map.current);
+        let marker = null;
+        if (map.current) {
+          marker = window.L.marker(
+            latLng,
+            {
+              icon: createPulsingIcon(),
+              title: `IP: ${ip}`,
+              riseOnHover: true
+            }
+          ).addTo(map.current);
+        } else {
+          throw new Error('Map is not initialized');
+        }
 
         // Add popup with IP info
         marker.bindPopup(`

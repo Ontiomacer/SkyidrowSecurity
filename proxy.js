@@ -1,4 +1,4 @@
-
+import { readFile } from 'fs/promises';
 
 import express from 'express';
 import fetch from 'node-fetch';
@@ -6,13 +6,35 @@ import cors from 'cors';
 import { exec } from 'child_process';
 import path from 'path';
 import Parser from 'rss-parser';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import multer from 'multer';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
+
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+// --- Read API Keys from src/config/apiKeys.ts ---
+let VIRUS_TOTAL_KEY = process.env.VIRUSTOTAL_API_KEY || process.env.VIRUS_TOTAL_KEY;
+if (!VIRUS_TOTAL_KEY) {
+  try {
+    // Read the file as text and extract the key using regex
+    const apiKeysPath = path.join(__dirname, 'src', 'config', 'apiKeys.ts');
+    console.log('[DEBUG] Attempting to read API keys from:', apiKeysPath);
+    const apiKeysText = readFileSync(apiKeysPath, 'utf8');
+    const match = apiKeysText.match(/VIRUS_TOTAL\s*:\s*['\"]([^'\"]+)['\"]/);
+    if (match) {
+      VIRUS_TOTAL_KEY = match[1];
+      console.log('[DEBUG] Loaded VirusTotal key from apiKeys.ts:', VIRUS_TOTAL_KEY ? '***' + VIRUS_TOTAL_KEY.slice(-6) : undefined);
+    } else {
+      console.log('[DEBUG] VIRUS_TOTAL key not found in apiKeys.ts');
+    }
+  } catch (e) {
+    console.log('[DEBUG] Error reading apiKeys.ts:', e.message);
+  }
+}
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -55,14 +77,13 @@ app.use((req, res, next) => {
 // --- VirusTotal Proxy Endpoint ---
 app.get('/api/virustotal/domains/:domain', async (req, res) => {
   const { domain } = req.params;
-  const apiKey = process.env.VIRUSTOTAL_API_KEY || process.env.VIRUS_TOTAL_KEY;
-  if (!apiKey) {
+  if (!VIRUS_TOTAL_KEY) {
     return res.status(500).json({ error: 'VirusTotal API key not configured on server.' });
   }
   try {
     const url = `https://www.virustotal.com/api/v3/domains/${domain}`;
     const vtRes = await fetch(url, {
-      headers: { 'x-apikey': apiKey }
+      headers: { 'x-apikey': VIRUS_TOTAL_KEY }
     });
     const data = await vtRes.json();
     res.status(vtRes.status).json(data);
@@ -432,6 +453,24 @@ app.post('/api/upload-wordlist', (req, res, next) => {
     }
     return res.json({ filename: req.file.filename });
   });
+});
+
+// --- RSS News Endpoint ---
+app.get('/api/rss-news', async (req, res) => {
+  try {
+    // For demo: serve static cybernews_articles.json as RSS-like news
+    const newsPath = path.join(__dirname, 'src', 'services', 'cybernews_articles.json');
+    const newsRaw = await readFile(newsPath, 'utf8');
+    let news = JSON.parse(newsRaw);
+    // Add a unique 'id' field to each article for frontend routing
+    news = news.map(article => ({
+      ...article,
+      id: article.link ? encodeURIComponent(article.link) : encodeURIComponent(article.title)
+    }));
+    res.json({ success: true, articles: news });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to load news', details: e.message });
+  }
 });
 
 
@@ -1026,6 +1065,3 @@ process.on('uncaughtException', (error) => {
     console.error('Uncaught Exception:', error);
     // Don't exit the process, just log the error
 });
-
-// Start the server
-startServer();

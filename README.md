@@ -128,3 +128,33 @@ Find UI screenshots in `src/docs/screenshots/`.
 ## 📄 License
 This project is open source. See [LICENSE](LICENSE) for details. Recommended: MIT or Apache 2.0.
 ThreatHunter Pro uses a modular architecture:
+
+---
+
+## 🟢 Deploying to Splunkbase
+
+### 1. Prepare the Splunk App Structure
+- Build your frontend: `npm run build`
+- Copy the build output (e.g., `dist/`) to `SkyidrowSecurity/appserver/static/`
+- Ensure you have:
+  - `SkyidrowSecurity/default/app.conf`
+  - `SkyidrowSecurity/appserver/static/` (with your build)
+  - `SkyidrowSecurity/README_splunkbase.md`
+
+### 2. Package the App
+```sh
+cd ..
+tar -czvf SkyidrowSecurity-1.0.0.tar.gz SkyidrowSecurity/
+```
+
+### 3. Install in Splunk
+- Go to Splunk Web > Manage Apps > Install app from file
+- Upload the `SkyidrowSecurity-1.0.0.tar.gz` file
+
+### 4. Access and Integrate
+- The app will appear in your Splunk navigation.
+- You can add Splunk dashboards, custom search commands, or REST API integrations as needed.
+
+For more, see `SkyidrowSecurity/README_splunkbase.md` and Splunk developer docs: https://dev.splunk.com/enterprise/docs/developapps/
+
+---

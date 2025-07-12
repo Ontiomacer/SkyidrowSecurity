@@ -92,16 +92,18 @@ export function useNewsAggregator(filters: {
         // CyberNews
         all = all.concat((cybernewsArticles as any[]).map(a => {
           const { cves, iocs } = extractIndicators(a.summary || a.content || '');
+          // Use the same encoding as backend for id
+          const id = a.link ? encodeURIComponent(a.link) : encodeURIComponent(a.title);
           return {
-            id: a.id,
+            id,
             title: a.title,
             author: a.source || 'CyberNews',
             date: a.date,
             category: 'Cyber Security',
-            link: a.url,
+            link: a.link || '',
             image: a.image,
             summary: a.summary,
-            content: a.summary,
+            content: a.summary + (a.content && a.content !== a.summary ? '\n\n' + a.content : ''),
             source: 'CyberNews',
             cves,
             iocs,
@@ -114,20 +116,21 @@ export function useNewsAggregator(filters: {
         try {
           const rssRes = await fetch('/api/rss-news');
           const rssData = await rssRes.json();
-          if (rssData.success && Array.isArray(rssData.items)) {
-            all = all.concat(rssData.items.map(item => {
+          // PATCH: backend returns articles not items
+          if (rssData.success && Array.isArray(rssData.articles)) {
+            all = all.concat(rssData.articles.map(item => {
               const { cves, iocs } = extractIndicators(item.content || item.summary || '');
               return {
                 id: item.id,
                 title: item.title,
-                author: item.author || item.source,
-                date: item.date,
-                category: item.category,
-                link: item.link,
+                author: item.author || item.source || 'CyberNews',
+                date: item.date || item.fetched_at || '',
+                category: item.category || 'Cyber Security',
+                link: item.link || '',
                 image: item.image,
                 summary: item.summary,
-                content: item.content,
-                source: item.source,
+                content: item.content || item.summary,
+                source: item.source || 'CyberNews',
                 cves,
                 iocs,
                 indicators: [...cves, ...iocs],
