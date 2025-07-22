@@ -131,7 +131,7 @@ ThreatHunter Pro uses a modular architecture:
 
 ---
 
-## 🟢 Deploying to Splunkbase
+## 🟢 Deploying to Splunkbase (Requested For Deployment)
 
 ### 1. Prepare the Splunk App Structure
 - Build your frontend: `npm run build`
