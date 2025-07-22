@@ -57,7 +57,7 @@ For issues or questions, please open an issue in the GitHub repository or contac
 ### 5. Access the App
 - Frontend: [http://localhost:8080](http://localhost:5173)
 - API Monitor Dashboard: [https://skyidrowsecurity.onrender.com/api/monitor](https://skyidrowsecurity.onrender.com/api/monitor)
-
+- If Deployed the Project Locally -> node proxy.js
 ### 6. Build & Deploy
 ```sh
 npm run build
